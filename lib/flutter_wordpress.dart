@@ -19,6 +19,7 @@ import 'package:meta/meta.dart';
 import 'constants.dart';
 import 'requests/params_category_list.dart';
 import 'requests/params_comment_list.dart';
+import 'requests/params_event_list.dart';
 import 'requests/params_media_list.dart';
 import 'requests/params_page_list.dart';
 import 'requests/params_post_list.dart';
@@ -27,6 +28,7 @@ import 'requests/params_user_list.dart';
 import 'schemas/category.dart';
 import 'schemas/comment.dart';
 import 'schemas/comment_hierarchy.dart';
+import 'schemas/event.dart';
 import 'schemas/fetch_user_result.dart';
 import 'schemas/jwt_response.dart';
 import 'schemas/media.dart';
@@ -39,6 +41,7 @@ import 'schemas/wordpress_error.dart';
 export 'constants.dart';
 export 'requests/params_category_list.dart';
 export 'requests/params_comment_list.dart';
+export 'requests/params_event_list.dart';
 export 'requests/params_media_list.dart';
 export 'requests/params_page_list.dart';
 export 'requests/params_post_list.dart';
@@ -49,6 +52,7 @@ export 'schemas/category.dart';
 export 'schemas/comment.dart';
 export 'schemas/comment_hierarchy.dart';
 export 'schemas/content.dart';
+export 'schemas/event.dart';
 export 'schemas/excerpt.dart';
 export 'schemas/fetch_user_result.dart';
 export 'schemas/guid.dart';
@@ -217,6 +221,38 @@ class WordPress {
         throw new WordPressError(
             code: 'wp_empty_user', message: "No user found");
       return User.fromJson(jsonStr);
+    } else {
+      try {
+        WordPressError err =
+            WordPressError.fromJson(json.decode(response.body));
+        throw err;
+      } catch (e) {
+        throw new WordPressError(message: response.body);
+      }
+    }
+  }
+
+  /// This returns an object FetchUsersResult based on the filter parameters
+  /// specified through [ParamsUserList] object. By default it returns only
+  /// [ParamsUserList.perPage] number of users in page [ParamsUserList.pageNum].
+  ///
+  /// In case of an error, a [WordPressError] object is thrown.
+  async.Future<List<Event>> fetchUpcomingEvents(
+      {@required ParamsEventList params}) async {
+    final StringBuffer url = new StringBuffer(_baseUrl + URL_EVENTS);
+
+    url.write(params.toString());
+
+    final response = await http.get(url.toString(), headers: _urlHeader);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      List<Event> events = new List<Event>();
+      final list = json.decode(response.body);
+
+      list.forEach((event) {
+        events.add(Event.fromJson(event));
+      });
+      return events;
     } else {
       try {
         WordPressError err =
@@ -443,7 +479,7 @@ class WordPress {
       list.forEach((user) {
         users.add(User.fromJson(user));
       });
-      return FetchUsersResult(users, totalUsers, params.pageNum);
+      return FetchUsersResult(users, totalUsers);
     } else {
       try {
         WordPressError err =

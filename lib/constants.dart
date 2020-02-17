@@ -12,6 +12,7 @@ const URL_POSTS = '$URL_WP_BASE/posts';
 const URL_TAGS = '$URL_WP_BASE/tags';
 const URL_USERS = '$URL_WP_BASE/users';
 const URL_USER_ME = '$URL_WP_BASE/users/me';
+const URL_EVENTS = '/wp-json/custom/events';
 
 enum WordPressAuthenticator {
   JWT,
