@@ -83,9 +83,9 @@ class WordPress {
   /// https://wordpress.org/plugins/application-passwords/
   WordPress(
       {@required String baseUrl,
-      WordPressAuthenticator authenticator,
-      String adminName,
-      String adminKey}) {
+    WordPressAuthenticator authenticator,
+    String adminName,
+    String adminKey}) {
     this._baseUrl = baseUrl.endsWith('/')
         ? baseUrl.substring(0, baseUrl.length - 1)
         : baseUrl;
@@ -100,7 +100,7 @@ class WordPress {
           _urlHeader['Authorization'] = 'Basic $base64';
           break;
         case WordPressAuthenticator.JWT:
-          //TODO: Implement JWT Admin authentication
+        //TODO: Implement JWT Admin authentication
           break;
       }
     }
@@ -138,7 +138,7 @@ class WordPress {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       JWTResponse authResponse =
-          JWTResponse.fromJson(json.decode(response.body));
+      JWTResponse.fromJson(json.decode(response.body));
       _token = authResponse.token;
 
       _urlHeader['Authorization'] = 'Bearer ${authResponse.token}';
@@ -161,7 +161,7 @@ class WordPress {
     _urlHeader['Authorization'] = 'Bearer ${token}';
 
     final response =
-        await http.post(_baseUrl + URL_JWT_TOKEN_VALIDATE, headers: _urlHeader);
+    await http.post(_baseUrl + URL_JWT_TOKEN_VALIDATE, headers: _urlHeader);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return fetchMeUser();
@@ -177,30 +177,20 @@ class WordPress {
   ///
   /// In case of an error, a [WordPressError] object is thrown.
   async.Future<User> fetchUser({int id, String email, String username}) async {
-    final StringBuffer url = new StringBuffer(_baseUrl + URL_USERS);
-    final Map<String, String> params = {
-      'search': '',
-    };
-    if (id != null) {
-      params['search'] = '$id';
-    } else if (email != null)
-      params['search'] = email;
-    else if (username != null) params['search'] = username;
+    final String url = "$_baseUrl} + $URL_USERS + $id";
 
-    url.write(constructUrlParams(params));
-
-    final response = await http.get(url.toString(), headers: _urlHeader);
+    final response = await http.get(url, headers: _urlHeader);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final jsonStr = json.decode(response.body);
       if (jsonStr.length == 0)
         throw new WordPressError(
             code: 'wp_empty_list', message: "No users found");
-      return User.fromJson(jsonStr[0]);
+      return User.fromJson(jsonStr);
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -213,7 +203,7 @@ class WordPress {
   /// In case of an error, a [WordPressError] object is thrown.
   async.Future<User> fetchMeUser() async {
     final response =
-        await http.get(_baseUrl + URL_USER_ME, headers: _urlHeader);
+    await http.get(_baseUrl + URL_USER_ME, headers: _urlHeader);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final jsonStr = json.decode(response.body);
@@ -224,7 +214,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -256,7 +246,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -316,7 +306,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -344,10 +334,10 @@ class WordPress {
     if (setComments) {
       List<Comment> comments = await fetchComments(
           params: ParamsCommentList(
-        includePostIDs: [post.id],
-        order: orderComments,
-        orderBy: orderCommentsBy,
-      ));
+            includePostIDs: [post.id],
+            order: orderComments,
+            orderBy: orderCommentsBy,
+          ));
       if (comments != null && comments.length != 0) {
         post.comments = comments;
 
@@ -361,7 +351,7 @@ class WordPress {
     }
     if (setCategories) {
       List<Category> categories =
-          await fetchCategories(params: ParamsCategoryList(post: post.id));
+      await fetchCategories(params: ParamsCategoryList(post: post.id));
       if (categories != null && categories.length != 0)
         post.categories = categories;
     }
@@ -394,7 +384,7 @@ class WordPress {
   CommentHierarchy _commentHierarchyBuilder(
       List<Comment> commentList, Comment comment) {
     final childComments = commentList.where((ele) =>
-        ele.id != comment.id && ele.parent != 0 && ele.parent == comment.id);
+    ele.id != comment.id && ele.parent != 0 && ele.parent == comment.id);
 
     if (childComments == null || childComments.length == 0) {
       return new CommentHierarchy(comment: comment, children: null);
@@ -432,7 +422,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -483,7 +473,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -514,7 +504,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -552,7 +542,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -583,7 +573,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -613,7 +603,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -644,7 +634,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -672,7 +662,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
@@ -700,7 +690,7 @@ class WordPress {
     } else {
       try {
         WordPressError err =
-            WordPressError.fromJson(json.decode(response.body));
+        WordPressError.fromJson(json.decode(response.body));
         throw err;
       } catch (e) {
         throw new WordPressError(message: response.body);
