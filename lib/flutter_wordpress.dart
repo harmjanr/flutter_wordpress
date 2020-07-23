@@ -177,7 +177,7 @@ class WordPress {
   ///
   /// In case of an error, a [WordPressError] object is thrown.
   async.Future<User> fetchUser({int id, String email, String username}) async {
-    final String url = "$_baseUrl} + $URL_USERS + $id";
+    final String url = "$_baseUrl + $URL_USERS + $id";
 
     final response = await http.get(url, headers: _urlHeader);
 
