@@ -81,8 +81,7 @@ class WordPress {
   /// If [WordPressAuthenticator.ApplicationPasswords] is used as an authenticator,
   /// [adminName] and [adminKey] is necessary for authentication.
   /// https://wordpress.org/plugins/application-passwords/
-  WordPress(
-      {@required String baseUrl,
+  WordPress({@required String baseUrl,
     WordPressAuthenticator authenticator,
     String adminName,
     String adminKey}) {
@@ -143,7 +142,7 @@ class WordPress {
 
       _urlHeader['Authorization'] = 'Bearer ${authResponse.token}';
 
-      return fetchUser(email: authResponse.userEmail);
+      return fetchMeUser();
     } else {
       try {
         throw new WordPressError.fromJson(json.decode(response.body));
@@ -176,17 +175,34 @@ class WordPress {
   /// Only one parameter is enough to search for the user.
   ///
   /// In case of an error, a [WordPressError] object is thrown.
+  /// This returns a [User] object if the user with [id], [email] or [username]
+  /// exists. Otherwise throws [WordPressError].
+  ///
+  /// Only one parameter is enough to search for the user.
+  ///
+  /// In case of an error, a [WordPressError] object is thrown.
   async.Future<User> fetchUser({int id, String email, String username}) async {
-    final String url = "$_baseUrl + $URL_USERS + $id";
+    final StringBuffer url = new StringBuffer(_baseUrl + URL_USERS);
+    final Map<String, String> params = {
+      'search': '',
+    };
+    if (id != null) {
+      params['search'] = '$id';
+    } else if (email != null)
+      params['search'] = email;
+    else if (username != null) params['search'] = username;
 
-    final response = await http.get(url, headers: _urlHeader);
+    url.write(constructUrlParams(params));
+
+    final response = await http.get(url.toString(), headers: _urlHeader);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final jsonStr = json.decode(response.body);
       if (jsonStr.length == 0)
         throw new WordPressError(
             code: 'wp_empty_list', message: "No users found");
-      return User.fromJson(jsonStr);
+
+      return User.fromJson(jsonStr[0]);
     } else {
       try {
         WordPressError err =
@@ -381,8 +397,8 @@ class WordPress {
   ///This recursive function builds the hierarchy of comments for the given post
   ///and comment. Only parent comments (direct comments to post) need to be
   ///supplied.
-  CommentHierarchy _commentHierarchyBuilder(
-      List<Comment> commentList, Comment comment) {
+  CommentHierarchy _commentHierarchyBuilder(List<Comment> commentList,
+      Comment comment) {
     final childComments = commentList.where((ele) =>
     ele.id != comment.id && ele.parent != 0 && ele.parent == comment.id);
 
